@@ -1,0 +1,13 @@
+
+#Follow these two guides to set up the infrastructure for what you need:
+https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+#Once you have kubectl and kubeam installed follow these commands
+setenforce 0 #this allows kubernetes to run by turning off selinux, this can open you up to volunaribilities but as long as you leave aws's firewall in place you should be fine.
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables #this is necessary to allow some networking features within kubernetes
+
+#Now for the fun stuff
+kubeadm init --config aws.yaml #run this command then follow all the onscreen instructions, this allows kubernetes to run as a single master cluster you can use kubeadm join to attach more nodes. the config parameter is optional but there is a sample yaml file that I will provide to show some of the options you can use.
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-verions=$(kubectl version | base64 | tr -d '\n')" #this sets weave as your container network manager allowing communication between resources within kubernetes weave is not the only option but it has been effective for all my usecases
+kubectl taint nodes --all # this removes the taint that is applied on the master node by default which prevents scheduling of pods on the master. This needs to be removed when making a single master cluster, however you should thereforever never use this in production as it opens up your cluster to unnecessary risk.
