@@ -1,5 +1,5 @@
 # Kubernetes
-The purpose of this Folder is to document some of the useful install instructions for kubernetes.
+The purpose of this Folder is to document some of the useful install instructions for kubernetes in an aws environment, not utilizing eks on an amazon machine image for aws.
 # Files:
 ## kubeadm
 ### Uses
