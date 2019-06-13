@@ -1,0 +1,3 @@
+Devices > GuestAdditions
+
+Always make sure to enable guest additions to have a much smoother virutal box experience.

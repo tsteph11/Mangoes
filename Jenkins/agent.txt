@@ -1,0 +1,13 @@
+When connecting a new agent.
+ssh-keygen on the agent.
+Create authorized_keys on both the agent and the master.
+sudo chown jenkins:jenkins authorized_keys
+Place the public key in both.
+ssh from agent to master.
+# you can't ssh from the master to the agent yet.
+
+Add the private key with the username of jenkins to a credential in jenkins.
+
+ssh -v ipofmaster can provide more information if you're still having trouble.
+
+known hosts is on the local, authorized keys is on the remote.

@@ -1,0 +1,5 @@
+/etc/passwd
+/bin/false prevents you from executing a shell as that user
+
+echo $?
+to see the errors from the last command run

@@ -1,0 +1,16 @@
+https://stackoverflow.com/questions/33792568/setting-up-the-kubernetes-plugin-on-jenkins
+
+Basically install the kubernetes jenkins plugin.
+Grab the kubeconfig from the server.
+
+
+you can verify permissions with this:
+ kubectl auth can-i create deployments \
+  --namespace production \
+  --as jane
+no
+
+kubectl auth can-i use podsecuritypolicies/privileged \
+  -n kube-system \
+  --as=system:serviceaccount:kube-system:calico-node
+yes
