@@ -3,3 +3,6 @@
 
 echo $?
 to see the errors from the last command run
+
+find the largest directories
+du -a / | sort -n -r | head -n 5

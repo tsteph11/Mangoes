@@ -1,0 +1,44 @@
+NAME:   tan-goose
+LAST DEPLOYED: Thu Jun 20 23:05:58 2019
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/Pod(related)
+NAME                    READY  STATUS   RESTARTS  AGE
+tan-goose-postgresql-0  0/1    Pending  0         0s
+
+==> v1/Secret
+NAME                  TYPE    DATA  AGE
+tan-goose-postgresql  Opaque  1     0s
+
+==> v1/Service
+NAME                           TYPE       CLUSTER-IP     EXTERNAL-IP  PORT(S)   AGE
+tan-goose-postgresql           ClusterIP  10.27.249.125  <none>       5432/TCP  0s
+tan-goose-postgresql-headless  ClusterIP  None           <none>       5432/TCP  0s
+
+==> v1beta2/StatefulSet
+NAME                  READY  AGE
+tan-goose-postgresql  0/1    0s
+
+
+NOTES:
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed via port 5432 on the following DNS name from within your cluster:
+
+    tan-goose-postgresql.default.svc.cluster.local - Read/Write connection
+To get the password for "postgres" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace default tan-goose-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+7WH8RFrhHF
+
+To connect to your database run the following command:
+    kubectl run tan-goose-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.3.0-debian-9-r38 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host tan-goose-postgresql -U postgres -p 5432
+
+
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace default svc/tan-goose-postgresql 5432:5432 &
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -p 5432

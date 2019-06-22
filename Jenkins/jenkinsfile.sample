@@ -1,0 +1,42 @@
+node{
+    cleanWs()
+    //pull the code from github
+    stage('pull'){
+        git(branch: 'feature/jenkins', credentialsId: 'Github', url: 'git@github.com:h6y3/allhands.git')
+    }
+    //do all pretest and deploy specific code such as rake:bump
+    stage('build'){
+        withCredentials([string(credentialsId: 'dev_database_password', variable: 'pass')]) {
+            sh """#!/bin/bash -l
+            mv config/database.yml.sample config/database.yml
+            gcloud auth configure-docker
+            rm -f Gemfile.lock
+            docker build --build-arg DATABASE_PASSWORD=${pass} . -t gcr.io/meeting-town/test:v1
+            docker push gcr.io/meeting-town/test:v1"""
+        }
+        
+    }
+    
+    stage('test'){
+        //once tests are up and running they should be performed at this stage before proceeding to the deploy stage.
+    }
+    
+    //create the artifacts to be deployed
+    stage('package'){
+        sh 'mkdir output'
+        sh """tar --exclude='./output' -zcvf ./output/${env.BUILD_NUMBER}-meeting.tgz ."""
+        sh 'ls output'
+         archiveArtifacts artifacts: 'output/*.tgz'
+    }
+    
+    stage('deploy'){
+        withCredentials([file(credentialsId: 'jenkinsSA', variable: 'FILE')]) {
+            sh """gcloud auth activate-service-account jenkins@meeting-town.iam.gserviceaccount.com --key-file=${FILE}
+            gcloud config set project meeting-town
+            gcloud config set compute/region us-central1
+            gcloud container clusters get-credentials meeting-town-dev --region=us-central1
+            kubectl apply -f ./kube/complete.yaml || true
+        """
+        }
+    }
+}
