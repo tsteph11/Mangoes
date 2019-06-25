@@ -1,0 +1,15 @@
+#remove all cronjobs
+crontab -r
+#check cronjobs
+crontab -l
+#edit cronjobs
+crontab -e
+#do it as user
+crontab -u username -letter
+
+
+example
+run a job every 2 hours
+0 */2 * * * <command-to-execute>
+
+https://www.ostechnix.com/a-beginners-guide-to-cron-jobs/

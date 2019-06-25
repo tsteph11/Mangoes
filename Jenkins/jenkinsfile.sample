@@ -7,12 +7,21 @@ node{
     //do all pretest and deploy specific code such as rake:bump
     stage('build'){
         withCredentials([string(credentialsId: 'dev_database_password', variable: 'pass')]) {
-            sh """#!/bin/bash -l
-            mv config/database.yml.sample config/database.yml
-            gcloud auth configure-docker
-            rm -f Gemfile.lock
-            docker build --build-arg DATABASE_PASSWORD=${pass} . -t gcr.io/meeting-town/test:v1
-            docker push gcr.io/meeting-town/test:v1"""
+            withCredentials([string(credentialsId: 'rails_master_key', variable: 'master')]) {
+                withCredentials([string(credentialsId: 'mail_password', variable: 'mail_password')]) {
+                    withEnv(["DATABASE_PASSWORD=${pass}","DB_PASSWORD=${pass}", "RAILS_ENV=development", "SECRET_KEY_BASE=${master}", "REDIS_URL=10.0.16.3", "MAIL_PASS=${mail_password}"]) {
+                        sh """#!/bin/bash -l
+                        mv config/database.yml.sample config/database.yml
+                        yarn install
+                        rake bump
+                        rake db:migrate
+                        gcloud auth configure-docker
+                        rm -f Gemfile.lock
+                        docker build -t gcr.io/meeting-town/meeting-town-dev:latest --build-arg RED_URL=${REDIS_URL} --build-arg DB_PASSWORD=${pass}  --build-arg R_ENV=${RAILS_ENV} --build-arg SECRET_KEY=${SECRET_KEY_BASE} --build-arg MAIL_PASS=${MAIL_PASS} . 
+                        """
+                    }
+                }
+            }
         }
         
     }
@@ -26,15 +35,17 @@ node{
         sh 'mkdir output'
         sh """tar --exclude='./output' -zcvf ./output/${env.BUILD_NUMBER}-meeting.tgz ."""
         sh 'ls output'
-         archiveArtifacts artifacts: 'output/*.tgz'
+        archiveArtifacts artifacts: 'output/*.tgz'
     }
     
     stage('deploy'){
+        //this should just be a push to the registry which will trigger a rebuild.
         withCredentials([file(credentialsId: 'jenkinsSA', variable: 'FILE')]) {
             sh """gcloud auth activate-service-account jenkins@meeting-town.iam.gserviceaccount.com --key-file=${FILE}
             gcloud config set project meeting-town
             gcloud config set compute/region us-central1
             gcloud container clusters get-credentials meeting-town-dev --region=us-central1
+            docker push gcr.io/meeting-town/meeting-town-dev:latest
             kubectl apply -f ./kube/complete.yaml || true
         """
         }
