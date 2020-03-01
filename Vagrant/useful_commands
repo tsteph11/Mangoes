@@ -1,0 +1,4 @@
+vagrant plugin install vagrant-vbguest
+vagrant init "boxname"
+vagrant up
+vagrant destroy
