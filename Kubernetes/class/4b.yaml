@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vip
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      status: vip
+  template:
+    metadata:
+      labels:
+        status: vip
+    spec:
+      containers:
+      - name: v1p1
+        image: busybox
+        args:
+        - sleep
+        - "10000000"
+      - name: v1p2
+        image: busybox
+        args:
+        - sleep
+        - "10000000"
+      - name: v1p3
+        image: busybox
+        args:
+        - sleep
+        - "10000000"
+      - name: v1p4
+        image: busybox
+        args:
+        - sleep
+        - "10000000"
+      nodeSelector:
+        status: vip

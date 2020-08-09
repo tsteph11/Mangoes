@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shell-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    envFrom:
+    - configMapRef:
+        name: fast-car
+    volumeMounts:
+    - name: color-vol
+      mountPath: /flow
+  volumes:
+    - name: color-vol
+      configMap:
+        name: colors

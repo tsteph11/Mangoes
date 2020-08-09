@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kirin
+  labels:
+    system: gigante
+spec:
+  selector:
+    matchLabels:
+      system: gigante
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        system: gigante
+    spec:
+      containers:
+      - image: nginx:1.16.1
+        imagePullPolicy: Always
+        name: nerg
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /test/configs
+          name: nergigante
+      - image: busybox
+        imagePullPolicy: Never
+        name: shh
+        command:
+         - sleep
+         - "30000"
+        env:
+        - name: SECRET
+          valueFrom:
+            secretKeyRef:
+              name: supersecret
+              key: pass
+          name: SECRETVARIABLE
+      volumes:
+      - name: nergigante
+        persistentVolumeClaim:
+          claimName: pipe2
+      
